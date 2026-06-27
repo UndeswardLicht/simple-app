@@ -43,15 +43,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Setup toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        // Setup drawer layout
         drawerLayout = findViewById(R.id.drawer_layout)
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
 
-        // Create ActionBarDrawerToggle for hamburger icon
         toggle = ActionBarDrawerToggle(
             this,
             drawerLayout,
@@ -65,12 +62,10 @@ class MainActivity : AppCompatActivity() {
         navigationView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_clients -> {
-                    // Already on clients view, just close the drawer
                     drawerLayout.closeDrawers()
                     true
                 }
                 R.id.nav_categories -> {
-                    // Navigate to CategoryListActivity
                     val intent = Intent(this, CategoryListActivity::class.java)
                     startActivity(intent)
                     drawerLayout.closeDrawers()
@@ -98,15 +93,14 @@ class MainActivity : AppCompatActivity() {
                         val intent = Intent(this@MainActivity, EditClientActivity::class.java)
                             .putExtra(EditClientActivity.EXTRA_CLIENT_ID, id)
                         startActivity(intent)
-                        viewModel.onNavigatedToEdit()
+                        viewModel.processIntent(ClientIntent.NavigatedToEdit)
                     }
                 }
             }
         }
 
         findViewById<Button>(R.id.button_add_client)?.setOnClickListener {
-            viewModel.addClient()
+            viewModel.processIntent(ClientIntent.AddClient)
         }
     }
-
 }

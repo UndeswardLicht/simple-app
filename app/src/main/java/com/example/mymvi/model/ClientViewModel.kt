@@ -15,14 +15,13 @@ import kotlinx.coroutines.launch
 class ClientViewModel : ViewModel() {
    private val _uiState = MutableStateFlow(ClientUiState())
    val uiState: StateFlow<ClientUiState> = _uiState.asStateFlow()
-   val clients: StateFlow<List<Client>> = ClientRepository.clients
 
    init {
-       viewModelScope.launch {
-          ClientRepository.clients.collect { list ->
-             _uiState.update { it.copy(clients = list) }
-          }
-       }
+      viewModelScope.launch {
+         ClientRepository.clients.collect { list ->
+            _uiState.update { it.copy(clients = list) }
+         }
+      }
    }
 
    fun processIntent(intent: ClientIntent) {
@@ -32,27 +31,27 @@ class ClientViewModel : ViewModel() {
          is ClientIntent.NavigateToEdit -> {
             _uiState.update { it.copy(navigateToEdit = intent.id) }
          }
+         is ClientIntent.NavigatedToEdit -> {
+            _uiState.update { it.copy(navigateToEdit = null) }
+         }
       }
    }
 
-   fun onNavigatedToEdit() {
-      _uiState.update { it.copy(navigateToEdit = null) }
-   }
-
-   fun addClient() {
+   private fun addClient() {
       viewModelScope.launch {
-         val currentList = clients.value
+         val currentList = ClientRepository.clients.value
          val nextId = (currentList.maxOfOrNull { it.id } ?: 0) + 1
-         val newClient = Client(
-             id = nextId,
-             name = "New Client $nextId",
-             email = "client$nextId@example.com"
+         ClientRepository.addClient(
+            Client(
+               id = nextId,
+               name = "New Client $nextId",
+               email = "client$nextId@example.com"
+            )
          )
-         ClientRepository.addClient(newClient)
       }
    }
 
-   fun deleteClient(clientId: Int) {
+   private fun deleteClient(clientId: Int) {
       viewModelScope.launch {
          ClientRepository.deleteClient(clientId)
       }
