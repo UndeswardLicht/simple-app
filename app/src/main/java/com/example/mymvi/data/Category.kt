@@ -1,4 +1,4 @@
-package com.example.mymvi
+package com.example.mymvi.data
 
 data class Category (
     val id: Int,

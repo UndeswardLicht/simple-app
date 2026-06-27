@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Mymvi">
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,15 +20,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".EditClientActivity"
+            android:name=".activity.EditClientActivity"
             android:exported="false"
             android:label="Edit Client"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".activity.MainActivity" />
         <activity
-            android:name=".CategoryListActivity"
+            android:name=".activity.CategoryListActivity"
             android:exported="false"
             android:label="Manage Categories"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".activity.MainActivity" />
     </application>
 
 </manifest>

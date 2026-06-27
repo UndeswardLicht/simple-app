@@ -1,4 +1,4 @@
-package com.example.mymvi
+package com.example.mymvi.data
 
 data class Client(
     val id: Int,

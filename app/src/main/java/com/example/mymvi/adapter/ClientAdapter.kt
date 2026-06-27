@@ -1,4 +1,4 @@
-package com.example.mymvi
+package com.example.mymvi.adapter
 
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +8,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mymvi.R
+import com.example.mymvi.data.Client
 
 class ClientAdapter (
     private val onItemClick: (Int) -> Unit,

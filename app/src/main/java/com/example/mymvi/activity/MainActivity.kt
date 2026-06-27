@@ -1,7 +1,8 @@
-package com.example.mymvi
+package com.example.mymvi.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -15,6 +16,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mymvi.R
+import com.example.mymvi.adapter.ClientAdapter
+import com.example.mymvi.intent.ClientIntent
+import com.example.mymvi.model.ClientViewModel
 import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.launch
 
@@ -29,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        val mainView = findViewById<android.view.View>(R.id.main)
+        val mainView = findViewById<View>(R.id.main)
         if (mainView != null) {
             ViewCompat.setOnApplyWindowInsetsListener(mainView) { v, insets ->
                 val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -78,20 +83,23 @@ class MainActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.recycler_view_clients)
 
         val adapter = ClientAdapter(
-            onItemClick = { id ->
-                val intent = Intent(this, EditClientActivity::class.java).apply {
-                    putExtra(EditClientActivity.EXTRA_CLIENT_ID, id)
-                }
-                startActivity(intent)
-            },
-            onDelete = { id -> viewModel.deleteClient(id) }
+            onItemClick = { id -> viewModel.processIntent(ClientIntent.NavigateToEdit(id)) },
+            onDelete = { id -> viewModel.processIntent(ClientIntent.DeleteClient(id)) }
         )
-        recyclerView.adapter = adapter
+
+        //recyclerView.adapter = adapter
 
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.clients.collect { clientList ->
-                    adapter.submitList(clientList)
+                viewModel.uiState.collect { state ->
+                    adapter.submitList(state.clients)
+
+                    state.navigateToEdit?.let { id ->
+                        val intent = Intent(this@MainActivity, EditClientActivity::class.java)
+                            .putExtra(EditClientActivity.EXTRA_CLIENT_ID, id)
+                        startActivity(intent)
+                        viewModel.onNavigatedToEdit()
+                    }
                 }
             }
         }
@@ -102,5 +110,3 @@ class MainActivity : AppCompatActivity() {
     }
 
 }
-
-

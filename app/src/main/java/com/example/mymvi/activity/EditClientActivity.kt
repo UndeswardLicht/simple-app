@@ -1,6 +1,7 @@
-package com.example.mymvi
+package com.example.mymvi.activity
 
 import android.os.Bundle
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -14,9 +15,11 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.mymvi.R
+import com.example.mymvi.data.Category
+import com.example.mymvi.model.EditClientViewModel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-
 
 class EditClientActivity : AppCompatActivity() {
 
@@ -29,7 +32,7 @@ class EditClientActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_edit_client)
 
-        val rootLayout = findViewById<android.view.View>(android.R.id.content)
+        val rootLayout = findViewById<View>(android.R.id.content)
         ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)

@@ -1,7 +1,10 @@
-package com.example.mymvi
+package com.example.mymvi.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.mymvi.data.Category
+import com.example.mymvi.data.Client
+import com.example.mymvi.data.ClientRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

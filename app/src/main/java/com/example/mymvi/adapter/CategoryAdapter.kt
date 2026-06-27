@@ -1,4 +1,4 @@
-package com.example.mymvi
+package com.example.mymvi.adapter
 
 import android.text.Editable
 import android.text.TextWatcher
@@ -12,26 +12,12 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mymvi.R
+import com.example.mymvi.data.Category
 
-class CategoryAdapter : ListAdapter<Category, CategoryAdapter.CategoryViewHolder>(CategoryDiffCallback()) {
-
-    private val editedCategories = mutableMapOf<Int, Category>()
-
-    fun getEditedCategories(): List<Category> {
-        val current = currentList.toMutableList()
-        editedCategories.forEach { (id, category) ->
-            val index = current.indexOfFirst { it.id == id }
-            if (index != -1) {
-                current[index] = category
-            }
-        }
-        return current
-    }
-
-    fun clearEditMode() {
-        editedCategories.clear()
-        notifyDataSetChanged()
-    }
+class CategoryAdapter(
+    private val onFieldChanged: (id: Int, title: String, cashBack: String) -> Unit
+) : ListAdapter<Category, CategoryAdapter.CategoryViewHolder>(CategoryDiffCallback()) {
 
     class CategoryViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val contentLayout: LinearLayout = view.findViewById(R.id.layout_category_content)
@@ -49,7 +35,6 @@ class CategoryAdapter : ListAdapter<Category, CategoryAdapter.CategoryViewHolder
 
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
         val category = getItem(position)
-        val displayCategory = editedCategories[category.id] ?: category
 
         holder.titleText.visibility = View.VISIBLE
         holder.cashbackText.visibility = View.VISIBLE
@@ -60,11 +45,11 @@ class CategoryAdapter : ListAdapter<Category, CategoryAdapter.CategoryViewHolder
         holder.editTitle.removeTextChangedListener(holder.editTitle.tag as? TextWatcher)
         holder.editCashback.removeTextChangedListener(holder.editCashback.tag as? TextWatcher)
 
-        holder.titleText.text = displayCategory.title
-        holder.cashbackText.text = "Cashback: ${displayCategory.cashBack}"
+        holder.titleText.text = category.title
+        holder.cashbackText.text = "Cashback: ${category.cashBack}"
 
-        holder.editTitle.setText(displayCategory.title)
-        holder.editCashback.setText(displayCategory.cashBack)
+        holder.editTitle.setText(category.title)
+        holder.editCashback.setText(category.cashBack)
 
         // Set background colors based on category title (matching the image)
         val bgColor = when (category.title.uppercase()) {
@@ -93,18 +78,17 @@ class CategoryAdapter : ListAdapter<Category, CategoryAdapter.CategoryViewHolder
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                val newCategory = category.copy(
-                    title = holder.editTitle.text.toString(),
-                    cashBack = holder.editCashback.text.toString()
+                onFieldChanged(
+                    category.id,
+                    holder.editTitle.text.toString(),
+                    holder.editCashback.text.toString()
                 )
-                editedCategories[category.id] = newCategory
             }
         }
 
         // Store reference to remove later
         holder.editTitle.tag = textWatcher
         holder.editCashback.tag = textWatcher
-
         holder.editTitle.addTextChangedListener(textWatcher)
         holder.editCashback.addTextChangedListener(textWatcher)
     }
