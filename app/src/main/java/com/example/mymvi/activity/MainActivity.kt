@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
             onDelete = { id -> viewModel.processIntent(ClientIntent.DeleteClient(id)) }
         )
 
-        //recyclerView.adapter = adapter
+        recyclerView.adapter = adapter
 
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {

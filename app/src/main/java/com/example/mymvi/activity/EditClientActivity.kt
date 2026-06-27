@@ -16,9 +16,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.mymvi.R
-import com.example.mymvi.data.Category
+import com.example.mymvi.intent.EditClientIntent
 import com.example.mymvi.model.EditClientViewModel
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class EditClientActivity : AppCompatActivity() {
@@ -45,54 +44,52 @@ class EditClientActivity : AppCompatActivity() {
         val backButton = findViewById<ImageButton>(R.id.button_back)
         val cancelButton = findViewById<Button>(R.id.button_cancel)
 
-        var categoriesList: List<Category> = emptyList()
+        val spinnerAdapter = ArrayAdapter<String>(
+            this,
+            android.R.layout.simple_spinner_item,
+            mutableListOf()
+        ).also {
+            it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            categorySpinner.adapter = it
+        }
 
         lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                combine(viewModel.client, viewModel.categories) { client, categories ->
-                    client to categories
-                }.collect { (client, categories) ->
-                    categoriesList = categories
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){
+                viewModel.uiState.collect { state ->
+                    if (state.isDone) {
+                        finish()
+                        return@collect
+                    }
+                    spinnerAdapter.clear()
+                    spinnerAdapter.addAll(state.categories.map { it.title })
 
-                    val adapter = ArrayAdapter(
-                        this@EditClientActivity,
-                        android.R.layout.simple_spinner_item,
-                        categories.map { it.title }
-                    )
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    categorySpinner.adapter = adapter
-
-                    if (client != null) {
+                    state.client?.let { client ->
                         if (nameEditText.text.isEmpty()) {
                             nameEditText.setText(client.name)
                         }
-
-                        val selectionIndex = categories.indexOfFirst { it.id == client.categoryId }
-                        if (selectionIndex != -1) {
-                            categorySpinner.setSelection(selectionIndex)
-                        }
+                        val index = state.categories.indexOfFirst { it.id == client.categoryId }
+                        if (index != -1) categorySpinner.setSelection(index)
                     }
                 }
             }
         }
 
         saveButton.setOnClickListener {
-            val selectedPosition = categorySpinner.selectedItemPosition
-            val categoryId = if (selectedPosition != Spinner.INVALID_POSITION && categoriesList.isNotEmpty()) {
-                categoriesList[selectedPosition].id
-            } else {
-                null
-            }
-            viewModel.saveClient(nameEditText.text.toString(), categoryId)
-            finish()
+            val pos = categorySpinner.selectedItemPosition
+            val categoryId = viewModel.uiState.value.categories
+                .getOrNull(pos)?.id
+            viewModel.processIntent(EditClientIntent.Save(
+                name = nameEditText.text.toString(),
+                categoryId = categoryId
+            ))
         }
 
         backButton.setOnClickListener {
-            finish()
+            viewModel.processIntent(EditClientIntent.Cancel)
         }
 
         cancelButton?.setOnClickListener {
-            finish()
+            viewModel.processIntent(EditClientIntent.Cancel)
         }
     }
 

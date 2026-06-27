@@ -1,8 +1,10 @@
 package com.example.mymvi.data
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
 object ClientRepository {
@@ -24,9 +26,9 @@ object ClientRepository {
     val clients: StateFlow<List<Client>> = _clients.asStateFlow();
     val categories: StateFlow<List<Category>> = _categories.asStateFlow();
 
-    fun getClientById(id: Int): Client? {
-        return _clients.value.find { it.id == id }
-    }
+
+    fun getClientById(id: Int): Flow<Client?> =
+        _clients.map { list -> list.find { it.id == id } }
 
     fun addClient(client: Client) {
         return _clients.update { it + client }

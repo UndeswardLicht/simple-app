@@ -2,24 +2,51 @@ package com.example.mymvi.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.mymvi.data.Category
-import com.example.mymvi.data.Client
+import androidx.lifecycle.viewModelScope
 import com.example.mymvi.data.ClientRepository
+import com.example.mymvi.intent.EditClientIntent
+import com.example.mymvi.state.EditClientUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class EditClientViewModel(private val clientId: Int) : ViewModel() {
-    private val _client = MutableStateFlow(ClientRepository.getClientById(clientId))
-    val client: StateFlow<Client?> = _client.asStateFlow()
+    private val _uiState = MutableStateFlow(EditClientUiState())
+    val uiState: StateFlow<EditClientUiState> = _uiState.asStateFlow()
 
-    val categories: StateFlow<List<Category>> = ClientRepository.categories
+    init {
+        viewModelScope.launch {
+            combine(
+                ClientRepository.getClientById(clientId),
+                ClientRepository.categories
+            ) { client, categories ->
+                _uiState.update { it.copy(client = client, categories = categories) }
+            }.collect {}
+        }
+    }
 
-    fun saveClient(newName: String, categoryId: Int?) {
-        val currentClient = _client.value
-        if (currentClient != null) {
-            val updatedClient = currentClient.copy(name = newName, categoryId = categoryId)
-            ClientRepository.updateClient(updatedClient)
+    fun processIntent(intent: EditClientIntent) {
+        when (intent) {
+            is EditClientIntent.Save -> {
+                viewModelScope.launch {
+                    _uiState.value.client?.let { existingClient ->
+                        ClientRepository.updateClient(
+                            existingClient.copy(
+                                name = intent.name,
+                                categoryId = intent.categoryId
+                            )
+                        )
+                    }
+                    _uiState.update { it.copy(isDone = true) }
+                }
+            }
+
+            is EditClientIntent.Cancel -> {
+                _uiState.update { it.copy(isDone = true) }
+            }
         }
     }
 
