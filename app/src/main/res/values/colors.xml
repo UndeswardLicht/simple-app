@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="green">#248277</color>
+    <color name="light_green">#E8F5E9</color>
+    <color name="light_cyan">#E0F7FA</color>
+    <color name="light_yellow">#FFF9C4</color>
+
+    <color name="border_regular">#E0E0E0</color>
+    <color name="border_premium">#26A69A</color>
+    <color name="border_vip">#FFB74D</color>
+</resources>
